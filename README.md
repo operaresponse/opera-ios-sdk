@@ -1,8 +1,10 @@
 Opera Response iOS SDK
 ======================
-Updated: December 15, 2014
+Updated: February 11, 2015
 
-Version: 0.1d
+Version: 0.2d
+
+Note: Revised to latest MoPub SDK 3.4
 
 About
 =====
