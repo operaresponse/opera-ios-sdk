@@ -26,7 +26,7 @@
 @implementation ORMediaworksInterstitialCustomEvent
 
 @synthesize delegate;
-@synthesize interstitial;
+@synthesize interstitial = _interstitial;
 @synthesize adResponse;
 
 - (id)init {
@@ -37,14 +37,14 @@
         
         if (ref) {
             ref.block = ^(ORAdResponse *response) {
-                if (response) {
+                if (response && [response.creative length] > 0) {
                     ref.adResponse = response;
                     MPAdConfiguration *configuration = [ref.delegate configuration];
                     configuration.adResponseData = [response.creative dataUsingEncoding:NSUTF8StringEncoding];
                     
                     ref.interstitial = [[MPInstanceProvider sharedProvider] buildMPMRAIDInterstitialViewControllerWithDelegate:ref configuration:configuration];
+                    [ref.interstitial setCloseButtonStyle:MPInterstitialCloseButtonStyleAlwaysHidden];
                     [ref.interstitial startLoading];
-                    [ref.delegate interstitialCustomEvent:ref didLoadAd:ref.interstitial];
                 } else {
                     [ref.delegate interstitialCustomEvent:ref didFailToLoadAdWithError:nil];
                 }
@@ -83,7 +83,7 @@
 
 - (void)interstitialDidLoadAd:(MPInterstitialViewController *)interstitial {
     MPLogInfo(@"OperaResponse MRAID interstitial did load");
-    //[self.delegate interstitialCustomEvent:self didLoadAd:self.interstitial];
+    [self.delegate interstitialCustomEvent:self didLoadAd:interstitial];
 }
 
 - (void)interstitialDidFailToLoadAd:(MPInterstitialViewController *)interstitial {

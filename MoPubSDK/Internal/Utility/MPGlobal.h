@@ -22,6 +22,7 @@ NSDictionary *MPDictionaryFromQueryString(NSString *query);
 NSString *MPSHA1Digest(NSString *string);
 BOOL MPViewIsVisible(UIView *view);
 BOOL MPViewIntersectsParentWindowWithPercent(UIView *view, CGFloat percentVisible);
+NSString *MPResourcePathForResource(NSString *resourceName);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -77,6 +78,17 @@ typedef NSUInteger MPInterstitialOrientationType;
 @interface UIDevice (MPAdditions)
 
 - (NSString *)hardwareDeviceName;
+- (BOOL)supportsOrientationMask:(UIInterfaceOrientationMask)orientationMask;
+- (BOOL)doesOrientation:(UIInterfaceOrientation)orientation matchOrientationMask:(UIInterfaceOrientationMask)orientationMask;
+
+@end
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+@interface UIApplication (MPAdditions)
+
+// Correct way to hide/show the status bar on pre-ios 7.
+- (void)mp_preIOS7setApplicationStatusBarHidden:(BOOL)hidden;
 
 @end
 
@@ -88,13 +100,14 @@ typedef NSUInteger MPInterstitialOrientationType;
 
 @protocol MPAdAlertManagerProtocol <NSObject>
 
-@property (nonatomic, retain) MPAdConfiguration *adConfiguration;
+@property (nonatomic, strong) MPAdConfiguration *adConfiguration;
 @property (nonatomic, copy) NSString *adUnitId;
 @property (nonatomic, copy) CLLocation *location;
-@property (nonatomic, assign) UIView *targetAdView;
-@property (nonatomic, assign) id delegate;
+@property (nonatomic, weak) UIView *targetAdView;
+@property (nonatomic, weak) id delegate;
 
 - (void)beginMonitoringAlerts;
+- (void)endMonitoringAlerts;
 - (void)processAdAlertOnce;
 
 @end

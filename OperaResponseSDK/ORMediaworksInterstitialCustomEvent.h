@@ -7,8 +7,8 @@
 //
 
 #import "MPInterstitialCustomEvent.h"
-#import "MPPrivateInterstitialCustomEventDelegate.h"
 #import "MPMRAIDInterstitialViewController.h"
+#import "MPPrivateInterstitialCustomEventDelegate.h"
 
 @interface ORMediaworksInterstitialCustomEvent : MPInterstitialCustomEvent <MPInterstitialViewControllerDelegate>
 
