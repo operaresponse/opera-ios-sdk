@@ -26,10 +26,6 @@
 
 @implementation ORMediaworksBannerCustomEvent
 
-@synthesize response;
-@synthesize delegate;
-@synthesize mraidController;
-
 - (id) init {
     self = [super init];
     
@@ -40,7 +36,6 @@
             if (adResponse) {
                 if (ref) {
                     ref.response = adResponse;
-                    
                     MPAdConfiguration *configuration = [self.delegate configuration];
                     configuration.adResponseData = [adResponse.creative dataUsingEncoding:NSUTF8StringEncoding];
                     
@@ -52,7 +47,6 @@
                     
                     self.mraidController = [[MPInstanceProvider sharedProvider] buildBannerMRControllerWithFrame:adViewFrame delegate:ref];
                     [self.mraidController loadAdWithConfiguration:configuration];
-                    
                 }
             } else {
                 if (ref) {
@@ -78,55 +72,44 @@
 
 #pragma mark - MRControllerDelegate
 
-- (CLLocation *)location
-{
+- (CLLocation *)location {
     return [self.delegate location];
 }
 
-- (NSString *)adUnitId
-{
+- (NSString *)adUnitId {
     return [self.delegate adUnitId];
 }
 
-- (MPAdConfiguration *)adConfiguration
-{
+- (MPAdConfiguration *)adConfiguration {
     return [self.delegate configuration];
 }
 
-- (UIViewController *)viewControllerForPresentingModalView
-{
+- (UIViewController *)viewControllerForPresentingModalView {
     return [self.delegate viewControllerForPresentingModalView];
 }
 
-- (void)adDidLoad:(UIView *)adView
-{
-    MPLogInfo(@"MoPub MRAID banner did load");
+- (void)adDidLoad:(UIView *)adView {
     [self.delegate bannerCustomEvent:self didLoadAd:adView];
     [ORSDK trackImpression:self.response];
 }
 
-- (void)adDidFailToLoad:(UIView *)adView
-{
+- (void)adDidFailToLoad:(UIView *)adView {
     MPLogInfo(@"MoPub MRAID banner did fail");
     [self.delegate bannerCustomEvent:self didFailToLoadAdWithError:nil];
 }
 
-- (void)closeButtonPressed
-{
+- (void)closeButtonPressed {
     //don't care
 }
 
-- (void)appShouldSuspendForAd:(UIView *)adView
-{
+- (void)appShouldSuspendForAd:(UIView *)adView {
     MPLogInfo(@"MoPub MRAID banner will begin action");
     [self.delegate bannerCustomEventWillBeginAction:self];
 }
 
-- (void)appShouldResumeFromAd:(UIView *)adView
-{
+- (void)appShouldResumeFromAd:(UIView *)adView {
     MPLogInfo(@"MoPub MRAID banner did end action");
     [self.delegate bannerCustomEventDidFinishAction:self];
 }
-
 
 @end
