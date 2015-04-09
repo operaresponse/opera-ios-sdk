@@ -13,5 +13,6 @@
 
 @property (retain, nonatomic, readonly) NSString *creative;
 @property (nonatomic, readonly) CGRect frame;
+@property (assign, readonly) BOOL vast;
 
 @end

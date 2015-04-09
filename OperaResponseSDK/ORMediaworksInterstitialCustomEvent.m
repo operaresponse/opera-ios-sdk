@@ -13,11 +13,15 @@
 
 // Opera
 #import <OperaResponse/ORSDK.h>
+#import <OperaResponse/ORVastXMLConfiguration.h>
+#import <OperaResponse/ORVastConfigurationManager.h>
+
 #import "ORMediaworksInterstitialCustomEvent.h"
+#import "ORMediaworksVastViewController.h"
 
 @interface ORMediaworksInterstitialCustomEvent()
 
-@property (nonatomic, strong) MPMRAIDInterstitialViewController *interstitial;
+@property (nonatomic, strong) MPInterstitialViewController *interstitial;
 @property (nonatomic, strong) ORAdResponse *adResponse;
 @property (copy) ORAdRequestCompletionBlock block;
 
@@ -25,28 +29,36 @@
 
 @implementation ORMediaworksInterstitialCustomEvent
 
-@synthesize delegate;
-@synthesize interstitial = _interstitial;
-@synthesize adResponse;
-
 - (id)init {
     self = [super init];
     
     if (self) {
-        __weak ORMediaworksInterstitialCustomEvent *ref = self;
+        __weak ORMediaworksInterstitialCustomEvent *weakSelf = self;
         
-        if (ref) {
-            ref.block = ^(ORAdResponse *response) {
-                if (response && [response.creative length] > 0) {
-                    ref.adResponse = response;
-                    MPAdConfiguration *configuration = [ref.delegate configuration];
-                    configuration.adResponseData = [response.creative dataUsingEncoding:NSUTF8StringEncoding];
+        if (weakSelf) {
+            weakSelf.block = ^(ORAdResponse *response) {
+                if (response) {
+                    weakSelf.adResponse = response;
                     
-                    ref.interstitial = [[MPInstanceProvider sharedProvider] buildMPMRAIDInterstitialViewControllerWithDelegate:ref configuration:configuration];
-                    [ref.interstitial setCloseButtonStyle:MPInterstitialCloseButtonStyleAlwaysHidden];
-                    [ref.interstitial startLoading];
+                    if (weakSelf.adResponse.vast == YES) {
+                        ORVastConfigurationManager *vcm = [[ORVastConfigurationManager alloc] initManagerWithXML:weakSelf.adResponse.creative];
+                        [vcm aggregateVastConfigurationWithCompletion:^(ORVastVideoConfiguration *vc) {
+                            MPAdConfiguration *configuration = [weakSelf.delegate configuration];
+                            weakSelf.interstitial = [[ORMediaworksVastViewController alloc] initWithAdConfiguration:configuration
+                                                                                    withVastConfiguration:vc];
+                            weakSelf.interstitial.delegate = weakSelf;
+                            [weakSelf.delegate interstitialCustomEvent:weakSelf didLoadAd:weakSelf.interstitial];
+                        }];
+                    } else {
+                        MPAdConfiguration *configuration = [weakSelf.delegate configuration];
+                        configuration.adResponseData = [response.creative dataUsingEncoding:NSUTF8StringEncoding];
+                        
+                        weakSelf.interstitial = [[MPInstanceProvider sharedProvider] buildMPMRAIDInterstitialViewControllerWithDelegate:weakSelf configuration:configuration];
+                        [(MPMRAIDInterstitialViewController *)weakSelf.interstitial startLoading];
+                        [weakSelf.delegate interstitialCustomEvent:weakSelf didLoadAd:weakSelf.interstitial];
+                    }
                 } else {
-                    [ref.delegate interstitialCustomEvent:ref didFailToLoadAdWithError:nil];
+                    [weakSelf.delegate interstitialCustomEvent:weakSelf didFailToLoadAdWithError:nil];
                 }
             };
         }
@@ -83,7 +95,7 @@
 
 - (void)interstitialDidLoadAd:(MPInterstitialViewController *)interstitial {
     MPLogInfo(@"OperaResponse MRAID interstitial did load");
-    [self.delegate interstitialCustomEvent:self didLoadAd:interstitial];
+    //[self.delegate interstitialCustomEvent:self didLoadAd:self.interstitial];
 }
 
 - (void)interstitialDidFailToLoadAd:(MPInterstitialViewController *)interstitial {

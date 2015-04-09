@@ -7,7 +7,8 @@
 //
 
 @import Foundation;
-#import <OperaResponse/ORAdResponse.h>
+//#import <OperaResponse/ORAdResponse.h>
+#import "ORAdResponse.h"
 
 typedef void (^ORAdRequestCompletionBlock)(ORAdResponse *);
 
